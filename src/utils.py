@@ -4,21 +4,23 @@ import re
 
 import constants
 
-def clean_filler_words(filler_words) -> list:
+def clean_words(words, min_length=0, max_length=999) -> list:
     """
-        Removes punctuation and special characters from filler words of specified length
+        Removes punctuation and special characters from words of specified length
 
-        :param filler_words: List of potential filler words
+        :param words: List of words
+        :param min_length: Minimal length of a word
+        :param max_length: Maximal length of a word
 
-        :return: List of filler words without punctuation and special characters
+        :return: List of words without punctuation and special characters
         :rtype: list
     """
-    for i in range(len(filler_words)):
-        filler_words[i] = re.sub(r"[^А-Яа-яЁё\s]", "", filler_words[i])
+    for i in range(len(words)):
+        words[i] = re.sub(r"[^А-Яа-яЁё\s]", "", words[i])
 
-    filler_words = [word.lower().strip() for word in filler_words if constants.filler_word_len_min <= len(word.lower().strip()) <= constants.filler_word_len_max]
+    words = [word.lower().strip() for word in words if min_length <= len(word.lower().strip()) <= max_length]
 
-    return filler_words
+    return words
 
 def extract_filler_words(data) -> set:
     """
@@ -31,7 +33,7 @@ def extract_filler_words(data) -> set:
     """
     filler_lists = data["text"].str.findall(r"<filler_words>(.*?)</filler_words>")
 
-    filler_lists = filler_lists.apply(clean_filler_words)
+    filler_lists = filler_lists.apply(lambda text: clean_words(text, constants.filler_word_len_min, constants.filler_word_len_max))
 
     filler_words = []
 
